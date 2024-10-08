@@ -27,22 +27,27 @@ def load_json_gz_to_dataframe(file_path, num_lines=0):
                             })
     return pd.DataFrame(data)
 
-def data_proecessing(dataset):
+def data_processing(dataset):
+    transcriptID_position = dataset[['transcript_id', 'position']]
     dataset['data'] = dataset['data'].apply(lambda x: np.mean(x, axis=0))
-    dataset.drop(columns=['transcript_id', 'position'])
     dataset = np.vstack(dataset["data"].values)
-    return dataset
+    return dataset, transcriptID_position
+
+def predict(dataset, transcriptID_position, model):
+    predictions = model.predict(dataset)
+    predictions_df = pd.DataFrame(predictions, columns=['score'])
+    predictions_df = pd.concat([transcriptID_position, predictions_df], axis=1)
+    predictions_df.rename(columns={'position': 'transcript_position'}, inplace=True)
+    predictions_df.to_csv('predictions.csv', index=False)
 
 def main(file_path):
     # change this to name of model
     model = load_model('final_model.keras')
     
     input_data = load_json_gz_to_dataframe(file_path)
-    input_data = data_proecessing(input_data)
+    input_data, transcriptID_position = data_processing(input_data)
     
-    predictions = model.predict(input_data)
-    predictions_df = pd.DataFrame(predictions, columns=['predictions'])
-    predictions_df.to_csv('predictions.csv', index=False)
+    predict(input_data, transcriptID_position, model)
 
 if __name__ == "__main__":
     input_file = input("File Path of json.gz dataset: ")
