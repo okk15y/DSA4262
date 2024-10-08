@@ -1,8 +1,8 @@
 import gzip
 import json
 import pandas as pd
- # change this to name of model script
-import prediction_model
+import numpy as np
+from tensorflow.keras.models import load_model
 
 def load_json_gz_to_dataframe(file_path, num_lines=0):
     '''
@@ -28,13 +28,13 @@ def load_json_gz_to_dataframe(file_path, num_lines=0):
     return pd.DataFrame(data)
 
 def main(file_path):
+    # change this to name of model
+    model = load_model('final_model.keras')
+    
     input_data = load_json_gz_to_dataframe(file_path)
+    input_data['data'] = input_data['data'].apply(lambda x: np.mean(x, axis=0))
     
-    # change this to name of model script
-    # assuming model script has a predict function that input a pd.DataFrame
-    predictions = prediction_model.predict(input_data)
-    
-    # assuming model script output a pd.DataFrame
+    predictions = model.predict(input_data)
     predictions.to_csv('predictions.csv', index=False)
 
 if __name__ == "__main__":
