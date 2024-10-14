@@ -1,5 +1,6 @@
 import gzip
 import json
+import joblib
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -45,10 +46,10 @@ def data_processing(dataset):
     data_lists = np.vstack(dataset['data'].values)
 
     # Initialize the StandardScaler
-    scaler = StandardScaler()
+    scaler = joblib.load('training_model_scaler.pkl')
 
     # Fit and transform the data
-    data_scaled = scaler.fit_transform(data_lists)
+    data_scaled = scaler.transform(data_lists)
 
     # Replace the original 'data' column with the scaled data
     dataset['data'] = list(data_scaled)

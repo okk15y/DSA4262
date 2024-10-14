@@ -1,5 +1,6 @@
 import gzip
 import json
+import joblib
 import pandas as pd
 import numpy as np
 from imblearn.over_sampling import SMOTE
@@ -61,6 +62,9 @@ def data_processing(dataset):
     
     # Extract the middle 5-mers sequence
     dataset['sequence'] = dataset['sequence'].apply(lambda x: x[1:-1])
+
+    # Save standardize scale
+    joblib.dump(scaler, 'training_model_scaler.pkl')
 
     
     # One-hot encoding
