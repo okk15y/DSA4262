@@ -95,7 +95,7 @@ def data_processing(dataset):
     # Combine 'data' and 'one_hot_encoded' into a single list for each row
     df_encoded['combined'] = df_encoded.apply(lambda x: x['data'].tolist() + x['one_hot_encoded'], axis=1)
 
-    dataset = np.vstack(dataset["data"].values)
+    dataset = np.vstack(df_encoded["combined"].values)
 
     return dataset, transcriptID_position
 
@@ -114,6 +114,8 @@ def main(file_path):
     
     input_data = load_json_gz_to_dataframe(file_path)
     input_data, transcriptID_position = data_processing(input_data)
+    print("Processed Dataset:\n", input_data[:5])
+    print("TranscriptID:\n", transcriptID_position[:5])
     
     predict(input_data, transcriptID_position, model)
 

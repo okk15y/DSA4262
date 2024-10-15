@@ -103,7 +103,7 @@ def data_processing(dataset):
     # Combine 'data' and 'one_hot_encoded' into a single list for each row
     df_encoded['combined'] = df_encoded.apply(lambda x: x['data'].tolist() + x['one_hot_encoded'], axis=1)
 
-    return dataset
+    return df_encoded
 
 
 def combine_data(dataset, labels):
@@ -120,7 +120,7 @@ def combine_data(dataset, labels):
 
 def X_y_train(merged_df):
     X_train = merged_df.drop(columns=['gene_id', 'transcript_id', 'position', 'label'])
-    X_train = np.vstack(X_train["data"].values)
+    X_train = np.vstack(X_train["combined"].values)
 
     y_train = merged_df[['label']]
 
@@ -162,9 +162,13 @@ def main(data_file, labels_file):
     labels = load_labels(labels_file)
 
     dataset = data_processing(dataset)
+    print("Processed Dataset:\n", dataset.head(5))
     merged_df = combine_data(dataset, labels)
+    print("Full Dataset:\n", merged_df.head(5))
 
     X_test, y_test = X_y_train(merged_df)
+    print("X Data:\n", X_test[:5])
+    print("y Data:\n", y_test[:5])
     
     model_building(X_test, y_test)
 
