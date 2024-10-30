@@ -90,7 +90,7 @@ def train_model(input_path, label_path):
 
         model.fit(
             X_fold_train, y_fold_train,
-            epochs=5,
+            epochs=10,
             batch_size=32,
             validation_data=(X_fold_val, y_fold_val),
             callbacks=[checkpoint]
