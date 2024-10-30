@@ -23,7 +23,7 @@ This repository contains the code and data for the DSA4262 project from FlexiPro
 
 1. Clone the repository:
     ```sh
-    git clone <repository-url>
+    git clone https://github.com/okk15y/DSA4262.git
     ```
 2. Install the required packages:
     ```sh
@@ -36,11 +36,11 @@ Before training the model and generating the predictions, ensure that you have i
 
 1. Train the model:
     ```sh
-    python model_training.py
+    python model_training.py --input train_data.json.gz --labels train_labels.csv
     ```
 2. Generate predictions:
     ```sh
-    python prediction.py
+    python prediction.py --input prediction_data.json.gz --output predictions --model trained_model.keras
     ```
 
 ### Authors
