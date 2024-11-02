@@ -19,8 +19,8 @@ The DSA4262 project aims to develop and evaluate machine learning models for pre
 - `mean_data_scaler.pkl`: Scaler used for normalizing data.
 - `model_training_LATEST.py`: Script for model training.
 - `prediction_LATEST.py`: Script for generating predictions.
-- `trained_model.keras`: Final trained model.
 - `dataset0.json.gz`: Data used for training
+- `dataset1.json.gz`: Sample data used for predictions
 
 ## Getting Started
 
@@ -33,8 +33,16 @@ The DSA4262 project aims to develop and evaluate machine learning models for pre
 
 1. Download the Specific Python Version (3.10) and pip
      ```sh
+    sudo apt update
+    sudo apt install software-properties-common -y
+    ```
+    
+    ```sh
     sudo add-apt-repository ppa:deadsnakes/ppa
     sudo apt-get update
+    ```
+
+    ```sh
     sudo apt-get install python3.10 python3.10-venv python3.10-dev
     sudo apt install python3-pip gzip 
     ```
