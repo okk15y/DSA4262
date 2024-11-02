@@ -1,6 +1,15 @@
 # DSA4262 Project
 This repository contains the code and data for the DSA4262 project from FlexiProtein. The project involves training and evaluating machine learning models to predict m6A sites.
 
+![Python](https://img.shields.io/badge/python-3.10-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg)
+
+## Project Overview
+
+The DSA4262 project aims to develop and evaluate machine learning models for predicting m6A sites in RNA sequences. m6A is a common and important RNA modification that plays a crucial role in various biological processes. Accurate prediction of m6A sites can provide valuable insights into RNA biology and disease mechanisms.
+
+
 ### Key Files and Directories
 
 - `best_model_fold_*.keras`: Saved models for different folds.
@@ -15,17 +24,18 @@ This repository contains the code and data for the DSA4262 project from FlexiPro
 
 ## Getting Started
 
-### Prerequisites (actually might not need this as installation will be part of their setup)
+### Prerequisites
 
-- Python 3.10 (i anyhow one this)
-- Required Python packages (listed in `requirements.txt`)
+- Python 3.10
+- `gzip` and `json` modules (part of the Python Standard Library)
 
 ### Installation
 
 1. Download the Specific Python Version (3.10) and pip
      ```sh
+    sudo add-apt-repository ppa:deadsnakes/ppa
     sudo apt-get update
-    sudo apt-get install python3.10
+    sudo apt-get install python3.10 python3.10-venv python3.10-dev
     sudo apt install python3-pip gzip 
     ```
 2. Create and activate the virtual environment
@@ -50,23 +60,23 @@ This repository contains the code and data for the DSA4262 project from FlexiPro
     pip install -r requirements.txt
     ```
 
-### Usage
+## Usage
 
-Before training the model and generating the predictions, ensure that you have imported the appropriate data in `.gz` file format.
+Before training the model and generating the predictions, ensure that you have imported the appropriate data in `.gz` file format. / or we just provide sample data in the repo
 
 1. Train the model:
     ```sh
-    python model_training.py --input train_data.json.gz --labels train_labels.csv
+    python model_training.py --input train_data.json.gz --labels train_labels.info.labelled
     ```
 2. Generate predictions:
     ```sh
     python prediction.py --input prediction_data.json.gz --output predictions --model trained_model.keras
     ```
 
-### Authors
+## Authors
 
 - 
 
-### License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
