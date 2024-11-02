@@ -1,3 +1,4 @@
+import os
 import argparse
 from tensorflow.keras.models import load_model
 from helper_functions import (
@@ -35,8 +36,15 @@ def make_predictions(input_path, output_path, model_path='trained_model.keras'):
     # Create a DataFrame with results
     results_df = dataset[['transcript_id', 'position']].copy()
     results_df['prediction'] = predictions
+
+    # Ensure the output directory exists
+    output_dir = os.path.dirname(output_path)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Save the results to a CSV file
     results_df.to_csv(output_path, index=False)
-    print(f"Predictions saved to {output_path}.csv")
+    print(f"Predictions saved to {output_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Make predictions using the trained model.')

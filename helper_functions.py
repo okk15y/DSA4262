@@ -35,7 +35,7 @@ def load_data_to_dataframe(file_path):
     else:
         with open(file_path, 'r') as f:
             for line in f:
-                json_data = json.load(f)
+                json_data = json.loads(line)
                 for transcript, positions in json_data.items():
                     for position, sequences in positions.items():
                         position = int(position)
@@ -45,7 +45,7 @@ def load_data_to_dataframe(file_path):
                                 'position': position,
                                 'sequence': sequence,
                                 'reads': reads
-                        })
+                            })
     return pd.DataFrame(data)
 
 def extract_mean_reads(dataset):
