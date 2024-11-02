@@ -1,7 +1,7 @@
 import argparse
 from tensorflow.keras.models import load_model
 from helper_functions import (
-    load_json_gz_to_dataframe,
+    load_data_to_dataframe,
     extract_mean_reads,
     load_scaler,
     scale_mean_reads,
@@ -20,7 +20,7 @@ def make_predictions(input_path, output_path, model_path='trained_model.keras'):
 
     # Load and preprocess new data
     print(f"Loading data from {input_path}...")
-    dataset = load_json_gz_to_dataframe(input_path)
+    dataset = load_data_to_dataframe(input_path)
     print("Preprocessing data...")
     dataset = extract_mean_reads(dataset)
     dataset = scale_mean_reads(dataset, scaler)
@@ -36,7 +36,7 @@ def make_predictions(input_path, output_path, model_path='trained_model.keras'):
     results_df = dataset[['transcript_id', 'position']].copy()
     results_df['prediction'] = predictions
     results_df.to_csv(output_path, index=False)
-    print(f"Predictions saved to {output_path}")
+    print(f"Predictions saved to {output_path}.csv")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Make predictions using the trained model.')

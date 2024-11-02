@@ -6,7 +6,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.metrics import AUC
 from sklearn.model_selection import GroupKFold
 from helper_functions import (
-    load_json_gz_to_dataframe,
+    load_data_to_dataframe,
     extract_mean_reads,
     scale_mean_reads,
     load_scaler,
@@ -43,7 +43,7 @@ def train_model(input_path, label_path):
     # Load and combine labels with the dataset
     print(f'Loading data from {input_path}...')
     labels = pd.read_csv(label_path)
-    dataset = load_json_gz_to_dataframe(input_path)
+    dataset = load_data_to_dataframe(input_path)
     dataset = combine_data(dataset, labels)
 
     print('Preprocessing data...')

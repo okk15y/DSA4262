@@ -5,29 +5,46 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-def load_json_gz_to_dataframe(file_path):
+def load_data_to_dataframe(file_path):
     """
-    Load gzipped JSON data into a DataFrame.
+    Load JSON data or gzipped JSON data into a DataFrame.
     
     Parameters:
-    - file_path (str): Path to the gzipped JSON file.
+    - file_path (str): Path to the JSON file or gzipped JSON file.
     
     Returns:
     - pd.DataFrame: DataFrame containing the loaded data.
     """
     data = []
-    with gzip.open(file_path, 'rt') as f:
-        for line in f:
-            json_data = json.loads(line)
-            for transcript, positions in json_data.items():
-                for position, sequences in positions.items():
-                    position = int(position)
-                    for sequence, reads in sequences.items():
-                        data.append({
-                            'transcript_id': transcript,
-                            'position': position,
-                            'sequence': sequence,
-                            'reads': reads
+    
+    # Open the file using gzip.open if it ends with .gz
+    if file_path.endswith('.gz'):
+        with gzip.open(file_path, 'rt') as f:
+            for line in f:
+                json_data = json.loads(line)
+                for transcript, positions in json_data.items():
+                    for position, sequences in positions.items():
+                        position = int(position)
+                        for sequence, reads in sequences.items():
+                            data.append({
+                                'transcript_id': transcript,
+                                'position': position,
+                                'sequence': sequence,
+                                'reads': reads
+                            })
+    else:
+        with open(file_path, 'r') as f:
+            for line in f:
+                json_data = json.load(f)
+                for transcript, positions in json_data.items():
+                    for position, sequences in positions.items():
+                        position = int(position)
+                        for sequence, reads in sequences.items():
+                            data.append({
+                                'transcript_id': transcript,
+                                'position': position,
+                                'sequence': sequence,
+                                'reads': reads
                         })
     return pd.DataFrame(data)
 
