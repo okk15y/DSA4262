@@ -6,6 +6,7 @@ from helper_functions import (
     load_scaler,
     scale_mean_reads,
     load_DRACH_encoder,
+    extract_middle_sequence,
     one_hot_encode_DRACH,
     prepare_for_model
 )
@@ -23,6 +24,7 @@ def make_predictions(input_path, output_path, model_path='trained_model.keras'):
     print("Preprocessing data...")
     dataset = extract_mean_reads(dataset)
     dataset = scale_mean_reads(dataset, scaler)
+    dataset = extract_middle_sequence(dataset)
     dataset = one_hot_encode_DRACH(dataset, encoder)
 
     # Prepare data for prediction

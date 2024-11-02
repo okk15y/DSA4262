@@ -28,8 +28,15 @@ def build_model(input_shape):
         Dropout(0.2),  # Another dropout layer
         Dense(1, activation='sigmoid')
     ])
-    # Set AUC with Precision-Recall (PR) curve
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=[AUC(curve='PR', name='auc_pr')])
+    # Keep track of AUC-PR and AUC-ROC during training
+    model.compile(
+        optimizer='adam',
+        loss='binary_crossentropy',
+        metrics=[
+            AUC(curve='PR', name='auc_pr'),  # AUC-PR
+            AUC(curve='ROC', name='auc_roc')  # AUC-ROC
+        ]
+    )
     return model
 
 def train_model(input_path, label_path):
@@ -73,12 +80,12 @@ def train_model(input_path, label_path):
     # Set up GroupKFold for cross-validation
     gkf = GroupKFold(n_splits=5)
     best_fold_auc = 0.0
-
+    
     for fold, (train_fold_idx, val_fold_idx) in enumerate(gkf.split(X_train, y_train, groups=gene_ids_train)):
         print(f'Training fold {fold + 1}...')
 
-        X_fold_train, X_fold_val = X_train[train_fold_idx], X_train[val_fold_idx]
-        y_fold_train, y_fold_val = y_train[train_fold_idx], y_train[val_fold_idx]
+        X_fold_train, X_fold_val = X_train[train_fold_idx].copy(), X_train[val_fold_idx].copy()
+        y_fold_train, y_fold_val = y_train[train_fold_idx].copy(), y_train[val_fold_idx].copy()
 
         model = build_model(X_fold_train.shape[1])
         checkpoint = ModelCheckpoint(
