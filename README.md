@@ -25,27 +25,27 @@ This repository contains the code and data for the DSA4262 project from FlexiPro
 1. Download the Specific Python Version (3.10) and pip
      ```sh
     sudo apt-get update
-    sudo apt-get install python3.5
+    sudo apt-get install python3.10
     sudo apt install python3-pip gzip 
     ```
-
-2. Clone the repository:
-    ```sh
-    git clone https://github.com/okk15y/DSA4262.git
-    ```
-
-3. Change into the DSA4262 Folder
-    ```sh
-    cd DSA4262
-    ```
-
-4. Install the required packages:
+2. Create and activate the virtual environment
     ```sh
     sudo pip3 install virtualenv
     virtualenv --python="/usr/bin/python3.10" test
     source test/bin/activate
     ```
 
+3. Clone the repository:
+    ```sh
+    git clone https://github.com/okk15y/DSA4262.git
+    ```
+
+4. Change into the DSA4262 Folder
+    ```sh
+    cd DSA4262
+    ```
+
+5. Install the required packages:
     ```sh
     pip install -r requirements.txt
     ```
