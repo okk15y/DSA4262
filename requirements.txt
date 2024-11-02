@@ -1,8 +1,6 @@
 numpy
 pandas
-scikit-learn
-tensorflow
-keras
+scikit-learn==1.5.2
+tensorflow==2.17.0
+keras==3.5.0
 joblib
-gzip
-json

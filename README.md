@@ -11,21 +11,41 @@ This repository contains the code and data for the DSA4262 project from FlexiPro
 - `model_training_LATEST.py`: Script for model training.
 - `prediction_LATEST.py`: Script for generating predictions.
 - `trained_model.keras`: Final trained model.
+- `dataset0.json.gz`: Data used for training
 
 ## Getting Started
 
-### Prerequisites
+### Prerequisites (actually might not need this as installation will be part of their setup)
 
-- Python 3.9.9 (i anyhow one this)
+- Python 3.10 (i anyhow one this)
 - Required Python packages (listed in `requirements.txt`)
 
 ### Installation
 
-1. Clone the repository:
+1. Download the Specific Python Version (3.10) and pip
+     ```sh
+    sudo apt-get update
+    sudo apt-get install python3.5
+    sudo apt install python3-pip gzip 
+    ```
+
+2. Clone the repository:
     ```sh
     git clone https://github.com/okk15y/DSA4262.git
     ```
-2. Install the required packages:
+
+3. Change into the DSA4262 Folder
+    ```sh
+    cd DSA4262
+    ```
+
+4. Install the required packages:
+    ```sh
+    sudo pip3 install virtualenv
+    virtualenv --python="/usr/bin/python3.10" test
+    source test/bin/activate
+    ```
+
     ```sh
     pip install -r requirements.txt
     ```
