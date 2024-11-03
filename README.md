@@ -11,16 +11,43 @@ The DSA4262 project aims to develop and evaluate machine learning models for pre
 
 
 ### Key Files and Directories
+```
+DSA4262/
+├── artifacts/
+│   ├── drach_encoder.pkl
+│   ├── mean_reads_scaler.pkl
+│   ├── trained_model.keras
+│   └── ...
+├── data/
+│   ├── # add sample test data here
+│   └── ...
+├── src/
+│   ├── helper_functions.py
+│   ├── model_training.py
+│   ├── prediction.py
+│   ├── Task1.ipynb
+│   └── Task2.ipynb
+├── .gitignore
+├── README.md
+└── requirements.txt
+```
 
-- `best_model_fold_*.keras`: Saved models for different folds.
-- `data.info.labelled`: Labelled data information.
-- `drach_encoder.pkl`: Encoder used for data preprocessing.
-- `helper_functions.py`: Contains helper functions used across the project.
-- `mean_data_scaler.pkl`: Scaler used for normalizing data.
-- `model_training_LATEST.py`: Script for model training.
-- `prediction_LATEST.py`: Script for generating predictions.
-- `dataset0.json.gz`: Data used for training
-- `dataset1.json.gz`: Sample data used for predictions
+- [`artifacts/`](./artifacts/): Contains saved models, encoders and scalers.
+  - `best_model_fold_*.keras`: Models for different folds.
+  - `drach_encoder.pkl`: Encoder used for data preprocessing.
+  - `mean_reads_scaler.pkl`: Scaler used for data preprocessing.
+  - `trained_model.keras`: Pre-trained model.
+  
+- [`data/`](./data/): # idk what to put here since these files cant be uploaded
+  - `dataset0.json.gz`: Data used for training.
+  - `dataset1.json.gz`: Sample data used for predictions.
+  - `data.info.labelled`: Labelled data information.
+
+- [`src/`](.src/): Contains source code files.
+  - `helper_functions.py`: Contains helper functions used across the project.
+  - `model_training.py`: Script for model training.
+  - `prediction.py`: Script for generating predictions.
+
 
 ## Getting Started
 
@@ -53,32 +80,34 @@ The DSA4262 project aims to develop and evaluate machine learning models for pre
     source test/bin/activate
     ```
 
-3. Clone the repository:
+3. Clone the repository
     ```sh
     git clone https://github.com/okk15y/DSA4262.git
     ```
 
-4. Change into the DSA4262 Folder
+4. Navigate into the src folder
     ```sh
-    cd DSA4262
+    cd DSA4262/src
     ```
 
-5. Install the required packages:
+5. Install the required packages
     ```sh
-    pip install -r requirements.txt
+    pip install -r ../requirements.txt
     ```
 
 ## Usage
 
-Before training the model and generating the predictions, ensure that you have imported the appropriate data in `.gz` file format. / or we just provide sample data in the repo
+Before training the model and generating the predictions, ensure that you have imported the appropriate data in `.gz` or `.json` file format. Sample data is also provided in the repo in the [`data`](./data/) folder. Starting in the src folder, 
 
-1. Train the model:
+1. (Optional) Train the model: # update with sample input data path
+    
+    A pre-trained model ([`trained_model.keras`](./artifacts/trained_model.keras)) is provided in the [`artifacts`](./artifacts/) directory. You can skip this step if you wish to use the provided model.
     ```sh
-    python model_training.py --input train_data.json.gz --labels train_labels.info.labelled
+    python model_training.py --input ../data/dataset0.json.gz --labels ../data/train_labels.info.labelled
     ```
-2. Generate predictions:
+2. Generate predictions:  #update this with sample input data path
     ```sh
-    python prediction.py --input prediction_data.json.gz --output predictions --model trained_model.keras
+    python prediction.py --input ../data/dataset1.json.gz --output ../data/predictions/predictions.csv --model ../artifacts/trained_model.keras
     ```
 
 ## Authors
