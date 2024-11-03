@@ -9,12 +9,15 @@ from helper_functions import (
     load_data_to_dataframe,
     extract_mean_reads,
     scale_mean_reads,
-    load_scaler,
     extract_middle_sequence,
     one_hot_encode_DRACH,
     combine_data,
     prepare_for_model
 )
+
+# Path to save the trained model to
+ARTIFACTS_FOLDER = "../artifacts/"
+OUTPUT_MODEL_PATH = f"{ARTIFACTS_FOLDER}/trained_model.keras"
 
 def build_model(input_shape):
     """
@@ -40,33 +43,32 @@ def build_model(input_shape):
     return model
 
 def train_model(input_path, label_path):
-    # Load and combine labels with the dataset
+    # Load and combine labels with the unlabelled dataset
     print(f'Loading data from {input_path}...')
     labels = pd.read_csv(label_path)
-    dataset = load_data_to_dataframe(input_path)
-    dataset = combine_data(dataset, labels)
+    df = load_data_to_dataframe(input_path)
+    df = combine_data(df, labels)
 
     print('Preprocessing data...')
     # Extract mean reads
-    dataset = extract_mean_reads(dataset)
+    df = extract_mean_reads(df)
 
     # One-hot encode the DRACH sequences
-    dataset = extract_middle_sequence(dataset)
-    dataset = one_hot_encode_DRACH(dataset)
+    df = extract_middle_sequence(df)
+    encoder, df = one_hot_encode_DRACH(df)
 
     # Prepare labels and group identifiers (gene_id)
-    y = dataset['label'].values
-    gene_ids = dataset['gene_id'].values
+    y = df['label'].values
+    gene_ids = df['gene_id'].values
 
     # Split data into train and test sets using GroupKFold on 'gene_id' (80-20 split)
-    train_idx, test_idx = next(GroupKFold(n_splits=5).split(dataset, y, groups=gene_ids))
-    train_data, test_data = dataset.iloc[train_idx], dataset.iloc[test_idx]
+    train_idx, test_idx = next(GroupKFold(n_splits=5).split(df, y, groups=gene_ids))
+    train_data, test_data = df.iloc[train_idx], df.iloc[test_idx]
     y_train, y_test = y[train_idx], y[test_idx]
 
     # Scale training set first before using the same scaler for the test set
-    train_data = scale_mean_reads(train_data)
-    scaler = load_scaler('mean_reads_scaler.pkl')
-    test_data = scale_mean_reads(test_data, scaler)
+    scaler, train_data = scale_mean_reads(train_data)
+    scaler, test_data = scale_mean_reads(test_data, scaler)
 
     # Prepare model input
     X_train = prepare_for_model(train_data)
@@ -89,7 +91,7 @@ def train_model(input_path, label_path):
 
         model = build_model(X_fold_train.shape[1])
         checkpoint = ModelCheckpoint(
-            f'best_model_fold_{fold + 1}.keras',
+            f"{ARTIFACTS_FOLDER}/best_model_fold_{fold + 1}.keras",
             save_best_only=True,
             monitor='val_auc_pr',
             mode='max'
@@ -104,7 +106,7 @@ def train_model(input_path, label_path):
         )
 
         # Load the best model for this fold and evaluate on the test set
-        model.load_weights(f'best_model_fold_{fold + 1}.keras')
+        model.load_weights(f"{ARTIFACTS_FOLDER}/best_model_fold_{fold + 1}.keras")
         test_auc = model.evaluate(X_test, y_test, verbose=0)[1]  # AUC-PR score
 
         print(f'Fold {fold + 1} Test AUC-PR: {test_auc:.4f}')
@@ -112,13 +114,16 @@ def train_model(input_path, label_path):
         # Save model if it has the highest AUC-PR so far
         if test_auc > best_fold_auc:
             best_fold_auc = test_auc
-            best_fold_model = f'best_model_fold_{fold + 1}.keras'
+            best_fold_model = f"{ARTIFACTS_FOLDER}/best_model_fold_{fold + 1}.keras"
 
     print(f'Best model from cross-validation (without SMOTE): {best_fold_model} with Test AUC-PR: {best_fold_auc:.4f}')
 
     # Save the best model
     model.load_weights(best_fold_model)
-    model.save('trained_model.keras')
+    model.save(OUTPUT_MODEL_PATH)
+    
+    return model
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train a model with specified input and labels.')

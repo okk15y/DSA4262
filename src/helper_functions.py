@@ -1,9 +1,15 @@
+import os
 import gzip
 import json
 import joblib
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+# If no existing mean reads scaler/ drach encoder, new ones will be created and saved to these paths
+ARTIFACTS_FOLDER = "../artifacts"
+MEAN_READS_SCALER_PATH = f"{ARTIFACTS_FOLDER}/mean_reads_scaler.pkl"
+DRACH_ENCODER_PATH = f"{ARTIFACTS_FOLDER}/drach_encoder.pkl"
 
 def load_data_to_dataframe(file_path):
     """
@@ -48,43 +54,86 @@ def load_data_to_dataframe(file_path):
                             })
     return pd.DataFrame(data)
 
-def extract_mean_reads(dataset):
+
+def combine_data(df, labels):
+    """
+    Combine df with labels
+    
+    Parameters:
+    - df (pd.DataFrame): DataFrame containing the unlabelled.
+    - labels (pd.DataFrame): DataFrame containing the labels.
+    
+    Returns:
+    - pd.DataFrame: Merged DataFrame with combined data and labels.
+    """
+    # Left join df with labels on 'transcript_id' and 'position'
+    merged_df = pd.merge(df, labels,
+                         left_on=['transcript_id', 'position'],
+                         right_on=['transcript_id', 'transcript_position'],
+                         how='left')
+    # Reorder gene_id to the first column and drop duplicate columns
+    gene_id = merged_df['gene_id']
+    merged_df = merged_df.drop(columns=['transcript_position', 'gene_id'])
+    merged_df.insert(0, 'gene_id', gene_id)
+    return merged_df
+
+
+def extract_mean_reads(df):
     """
     Compute the mean of 'reads' for each row.
     
     Parameters:
-    - dataset (pd.DataFrame): DataFrame containing the 'reads' column.
+    - df (pd.DataFrame): DataFrame containing the 'reads' column.
     
     Returns:
     - pd.DataFrame: DataFrame with an additional 'mean_reads' column.
     """
-    dataset['mean_reads'] = dataset['reads'].apply(lambda x: np.mean(x, axis=0))
-    return dataset
+    df['mean_reads'] = df['reads'].apply(lambda x: np.mean(x, axis=0))
+    return df
 
-def scale_mean_reads(dataset, scaler=None, scaler_path='mean_reads_scaler.pkl'):
+
+def extract_middle_sequence(df):
+    """
+    Extract the middle 5-mers sequence from the 'sequence' column.
+    
+    Parameters:
+    - df (pd.DataFrame): DataFrame containing the 'sequence' column.
+    
+    Returns:
+    - pd.DataFrame: DataFrame with an additional 'middle_sequence' column.
+    """
+    df['middle_sequence'] = df['sequence'].apply(lambda x: x[1:-1])
+    return df
+
+
+###################
+# Scaling
+###################
+def scale_mean_reads(df, scaler=None, scaler_path=MEAN_READS_SCALER_PATH):
     """
     Scale the 'mean_reads' column using StandardScaler.
     
     Parameters:
-    - dataset (pd.DataFrame): DataFrame containing the 'mean_reads' column.
+    - df (pd.DataFrame): DataFrame containing the 'mean_reads' column.
     - scaler (StandardScaler, optional): Pre-fitted scaler. If None, a new scaler will be fitted.
     - scaler_path (str): Path to save the fitted scaler.
     
     Returns:
-    - pd.DataFrame: DataFrame with an additional 'scaled_mean_reads' column.
+    - scaler: The provided or newly fitted scaler.
+    - df (pd.DataFrame): DataFrame with an additional 'scaled_mean_reads' column.
     """
+    df = df.copy() # to avoid warning
     if scaler is None: # If no scaler is provided, fit a new one and save it
         scaler = StandardScaler()
-        scaled_mean_reads = scaler.fit_transform(np.vstack(dataset['mean_reads'].values))
-        dataset['scaled_mean_reads'] = list(scaled_mean_reads)
+        scaled_mean_reads = scaler.fit_transform(np.vstack(df['mean_reads'].values))
         joblib.dump(scaler, scaler_path)
         print('Scaler saved to', scaler_path)
     else: # Use the provided scaler to transform the data
-        scaled_mean_reads = scaler.transform(np.vstack(dataset['mean_reads'].values))
-        dataset['scaled_mean_reads'] = list(scaled_mean_reads)
-    return dataset
+        scaled_mean_reads = scaler.transform(np.vstack(df['mean_reads'].values))
+    df['scaled_mean_reads'] = list(scaled_mean_reads)
+    return scaler, df
 
-def load_scaler(scaler_path='mean_reads_scaler.pkl'):
+def load_scaler(scaler_path=MEAN_READS_SCALER_PATH):
     """
     Load the saved scaler from the given path.
     
@@ -96,6 +145,10 @@ def load_scaler(scaler_path='mean_reads_scaler.pkl'):
     """
     return joblib.load(scaler_path)
 
+
+########################
+# DRACH encoder
+########################
 def drach_encoder():
     """
     Return a OneHotEncoder object with predefined DRACH motifs.
@@ -109,43 +162,7 @@ def drach_encoder():
     encoder = OneHotEncoder(categories=[drach_motifs], handle_unknown='ignore')
     return encoder
 
-def extract_middle_sequence(dataset):
-    """
-    Extract the middle 5-mers sequence from the 'sequence' column.
-    
-    Parameters:
-    - dataset (pd.DataFrame): DataFrame containing the 'sequence' column.
-    
-    Returns:
-    - pd.DataFrame: DataFrame with an additional 'middle_sequence' column.
-    """
-    dataset['middle_sequence'] = dataset['sequence'].apply(lambda x: x[1:-1])
-    return dataset
-
-def one_hot_encode_DRACH(dataset, encoder=None, encoder_path='drach_encoder.pkl'):
-    """
-    Apply one-hot encoding to the middle 5-mers sequence.
-    
-    Parameters:
-    - dataset (pd.DataFrame): DataFrame containing the 'middle_sequence' column.
-    - encoder (OneHotEncoder, optional): Pre-fitted encoder. If None, a new encoder will be fitted.
-    - encoder_path (str): Path to save the fitted encoder.
-    
-    Returns:
-    - pd.DataFrame: DataFrame with an additional 'middle_sequence_OHE' column.
-    """
-    # One-hot encode the middle sequence
-    if encoder is None: # If no encoder is provided, fit a new one and save it
-        encoder = drach_encoder()
-        one_hot_matrix = encoder.fit_transform(dataset[['middle_sequence']])
-        joblib.dump(encoder, encoder_path)
-        print('DRACH Encoder saved to', encoder_path)
-    else:
-        one_hot_matrix = encoder.transform(dataset[['middle_sequence']])
-    dataset['middle_sequence_OHE'] = list(one_hot_matrix.toarray())
-    return dataset
-
-def load_DRACH_encoder(encoder_path='drach_encoder.pkl'):
+def load_DRACH_encoder(encoder_path=DRACH_ENCODER_PATH):
     """
     Load the saved DRACH encoder from the given path.
     
@@ -157,37 +174,43 @@ def load_DRACH_encoder(encoder_path='drach_encoder.pkl'):
     """
     return joblib.load(encoder_path)
 
-def combine_data(dataset, labels):
+def one_hot_encode_DRACH(df, encoder=None, encoder_path=DRACH_ENCODER_PATH):
     """
-    Combine dataset with labels
+    Apply one-hot encoding to the middle 5-mers sequence.
     
     Parameters:
-    - dataset (pd.DataFrame): DataFrame containing the dataset.
-    - labels (pd.DataFrame): DataFrame containing the labels.
+    - df (pd.DataFrame): DataFrame containing the 'middle_sequence' column.
+    - encoder (OneHotEncoder, optional): Pre-fitted encoder. If None, a new encoder will be fitted.
+    - encoder_path (str): Path to save the fitted encoder.
     
     Returns:
-    - pd.DataFrame: Merged DataFrame with combined data and labels.
+    - encoder: The provided or newly fitted encoder.
+    - df (pd.DataFrame): DataFrame with an additional 'middle_sequence_OHE' column.
     """
-    # Left join dataset with labels on 'transcript_id' and 'position'
-    merged_df = pd.merge(dataset, labels,
-                         left_on=['transcript_id', 'position'],
-                         right_on=['transcript_id', 'transcript_position'],
-                         how='left')
-    # Reorder gene_id to the first column and drop duplicate columns
-    gene_id = merged_df['gene_id']
-    merged_df = merged_df.drop(columns=['transcript_position', 'gene_id'])
-    merged_df.insert(0, 'gene_id', gene_id)
-    return merged_df
+    # One-hot encode the middle sequence
+    if encoder is None: # If no encoder is provided, fit a new one and save it
+        encoder = drach_encoder()
+        one_hot_matrix = encoder.fit_transform(df[['middle_sequence']])
+        joblib.dump(encoder, encoder_path)
+        print('DRACH Encoder saved to', encoder_path)
+    else:
+        one_hot_matrix = encoder.transform(df[['middle_sequence']])
+    df['middle_sequence_OHE'] = list(one_hot_matrix.toarray())
+    return encoder, df
 
-def prepare_for_model(dataset):
+
+##############################
+# Prepare data for model input
+##############################
+def prepare_for_model(df):
     """
     Combine 'scaled_mean_reads' and `middle_sequence_OHE` for model input.
     
     Parameters:
-    - dataset (pd.DataFrame): DataFrame containing 'scaled_mean_reads' and 'middle_sequence_OHE' columns.
+    - df (pd.DataFrame): DataFrame containing 'scaled_mean_reads' and 'middle_sequence_OHE' columns.
     
     Returns:
     - np.ndarray: Combined features for model input.
     """
-    combined_features = np.hstack([np.vstack(dataset['scaled_mean_reads']), np.vstack(dataset['middle_sequence_OHE'])])
+    combined_features = np.hstack([np.vstack(df['scaled_mean_reads']), np.vstack(df['middle_sequence_OHE'])])
     return combined_features
