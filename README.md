@@ -58,6 +58,8 @@ DSA4262/
 
 ### Installation
 
+1. Set up an AWS Ubuntu Instance (recommended t2.2xlarge)
+
 1. Download the Specific Python Version (3.10) and pip
      ```sh
     sudo apt update
@@ -71,6 +73,9 @@ DSA4262/
 
     ```sh
     sudo apt-get install python3.10 python3.10-venv python3.10-dev
+    ```
+
+    ```sh
     sudo apt install python3-pip gzip 
     ```
 2. Create and activate the virtual environment
