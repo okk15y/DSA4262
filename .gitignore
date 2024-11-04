@@ -11,3 +11,15 @@ data/dataset1.json.gz
 data/dataset2.json.gz
 data/dataset3.json.gz
 data/predictions.csv
+data/SGNex_A549_directRNA_replicate5_run1_data.json
+data/SGNex_A549_directRNA_replicate6_run1_data.json
+data/SGNex_Hct116_directRNA_replicate3_run1_data.json
+data/SGNex_Hct116_directRNA_replicate3_run4_data.json
+data/SGNex_Hct116_directRNA_replicate4_run3_data.json
+data/SGNex_HepG2_directRNA_replicate5_run2_data.json
+data/SGNex_HepG2_directRNA_replicate6_run1_data.json
+data/SGNex_K562_directRNA_replicate4_run1_data.json
+data/SGNex_K562_directRNA_replicate5_run1_data.json
+data/SGNex_K562_directRNA_replicate6_run1_data.json
+data/SGNex_MCF7_directRNA_replicate3_run1_data.json
+data/SGNex_MCF7_directRNA_replicate4_run1_data.json
