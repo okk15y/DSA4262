@@ -38,10 +38,10 @@ DSA4262/
   - `mean_reads_scaler.pkl`: Scaler used for data preprocessing.
   - `trained_model.keras`: Pre-trained model.
   
-- [`data/`](./data/): # idk what to put here since these files cant be uploaded
-  - `dataset0.json.gz`: Data used for training.
-  - `dataset1.json.gz`: Sample data used for predictions.
-  - `data.info.labelled`: Labelled data information.
+- [`data/`](./data/): # To be provided (e.g. slice/sample from datasets)
+  - `train_data.json.gz`: Sample training data
+  - `train_labels.csv`: Sample training labels
+  - `prediction_data.json`: Sample prediction data
 
 - [`src/`](.src/): Contains source code files.
   - `helper_functions.py`: Contains helper functions used across the project.
@@ -108,11 +108,11 @@ Before training the model and generating the predictions, ensure that you have i
     
     A pre-trained model ([`trained_model.keras`](./artifacts/trained_model.keras)) is provided in the [`artifacts`](./artifacts/) directory. You can skip this step if you wish to use the provided model.
     ```sh
-    python model_training.py --input ../data/dataset0.json.gz --labels ../data/train_labels.info.labelled
+    python model_training.py --input ../data/train_data.json.gz --labels ../data/train_labels.csv
     ```
 2. Generate predictions:  #update this with sample input data path
     ```sh
-    python prediction.py --input ../data/dataset1.json.gz --output ../data/predictions/predictions.csv --model ../artifacts/trained_model.keras
+    python prediction.py --input ../data/prediction_data.json --output ../data/predictions/predictions.csv --model ../artifacts/trained_model.keras
     ```
 
 ## Authors
