@@ -17,10 +17,11 @@ DSA4262/
 │   ├── drach_encoder.pkl
 │   ├── mean_reads_scaler.pkl
 │   ├── trained_model.keras
-│   └── ...
+│   └── temp_best_model_fold.keras
 ├── data/
-│   ├── # add sample test data here
-│   └── ...
+│   ├── train_data.json.gz
+│   ├── train_labels.csv
+|   └── prediction_data.json
 ├── src/
 │   ├── helper_functions.py
 │   ├── model_training.py
@@ -33,12 +34,12 @@ DSA4262/
 ```
 
 - [`artifacts/`](./artifacts/): Contains saved models, encoders and scalers.
-  - `best_model_fold_*.keras`: Models for different folds.
+  - `temp_best_model_fold.keras`: Log the best model for each fold during training.
   - `drach_encoder.pkl`: Encoder used for data preprocessing.
   - `mean_reads_scaler.pkl`: Scaler used for data preprocessing.
   - `trained_model.keras`: Pre-trained model.
   
-- [`data/`](./data/): # To be provided (e.g. slice/sample from datasets)
+- [`data/`](./data/):
   - `train_data.json.gz`: Sample training data
   - `train_labels.csv`: Sample training labels
   - `prediction_data.json`: Sample prediction data
@@ -104,13 +105,13 @@ DSA4262/
 
 Before training the model and generating the predictions, ensure that you have imported the appropriate data in `.gz` or `.json` file format. Sample data is also provided in the repo in the [`data`](./data/) folder. Starting in the src folder, 
 
-1. (Optional) Train the model: # update with sample input data path
+1. (Optional) Train the model:
     
     A pre-trained model ([`trained_model.keras`](./artifacts/trained_model.keras)) is provided in the [`artifacts`](./artifacts/) directory. You can skip this step if you wish to use the provided model.
     ```sh
     python model_training.py --input ../data/train_data.json.gz --labels ../data/train_labels.csv
     ```
-2. Generate predictions:  #update this with sample input data path
+2. Generate predictions:
     ```sh
     python prediction.py --input ../data/prediction_data.json --output ../data/predictions/predictions.csv --model ../artifacts/trained_model.keras
     ```
