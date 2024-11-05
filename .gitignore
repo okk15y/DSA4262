@@ -23,3 +23,5 @@ data/SGNex_K562_directRNA_replicate5_run1_data.json
 data/SGNex_K562_directRNA_replicate6_run1_data.json
 data/SGNex_MCF7_directRNA_replicate3_run1_data.json
 data/SGNex_MCF7_directRNA_replicate4_run1_data.json
+data/predictions/combined_predictions.csv
+data/predictions/combined_predictions_grouped.csv
