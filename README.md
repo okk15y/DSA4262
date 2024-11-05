@@ -59,7 +59,7 @@ DSA4262/
 
 ### Installation
 
-1. Set up an AWS Ubuntu Instance (recommended t2.2xlarge)
+1. Set up an AWS Ubuntu Instance (recommended t3.medium)
 
 1. Download the Specific Python Version (3.10) and pip
      ```sh
@@ -118,7 +118,10 @@ Before training the model and generating the predictions, ensure that you have i
 
 ## Authors
 
-- 
+- Chong Jing Ren
+- Liew Jia Xuan, Celine
+- Ong Kok Kiong
+- Quek Hong Lin
 
 ## License
 
