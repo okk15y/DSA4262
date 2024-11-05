@@ -16,8 +16,8 @@ DSA4262/
 ├── artifacts/
 │   ├── drach_encoder.pkl
 │   ├── mean_reads_scaler.pkl
-│   ├── trained_model.keras
-│   └── temp_best_model_fold.keras
+│   ├── temp_best_model_fold.keras 
+│   └── trained_model.keras
 ├── data/
 │   ├── train_data.json.gz
 │   ├── train_labels.csv
@@ -34,9 +34,9 @@ DSA4262/
 ```
 
 - [`artifacts/`](./artifacts/): Contains saved models, encoders and scalers.
-  - `temp_best_model_fold.keras`: Log the best model for each fold during training.
   - `drach_encoder.pkl`: Encoder used for data preprocessing.
   - `mean_reads_scaler.pkl`: Scaler used for data preprocessing.
+  - `temp_best_model_fold.keras`: Used to log the best model for each fold during cross validation for model training.
   - `trained_model.keras`: Pre-trained model.
   
 - [`data/`](./data/):
