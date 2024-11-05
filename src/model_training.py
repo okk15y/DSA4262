@@ -1,10 +1,11 @@
 import argparse
 import pandas as pd
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Input, Dense, Dropout
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.metrics import AUC
-from sklearn.model_selection import GroupKFold
+from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import KFold
 from helper_functions import (
     load_data_to_dataframe,
     extract_mean_reads,
@@ -50,78 +51,59 @@ def train_model(input_path, label_path):
     df = combine_data(df, labels)
 
     print('Preprocessing data...')
-    # Extract mean reads
     df = extract_mean_reads(df)
-
-    # One-hot encode the DRACH sequences
+    df = scale_mean_reads(df)
     df = extract_middle_sequence(df)
     encoder, df = one_hot_encode_DRACH(df)
 
-    # Prepare labels and group identifiers (gene_id)
-    y = df['label'].values
-    gene_ids = df['gene_id'].values
+    X_train = prepare_for_model(df)
+    y_train = df['label'].values
 
-    # Split data into train and test sets using GroupKFold on 'gene_id' (80-20 split)
-    train_idx, test_idx = next(GroupKFold(n_splits=5).split(df, y, groups=gene_ids))
-    train_data, test_data = df.iloc[train_idx], df.iloc[test_idx]
-    y_train, y_test = y[train_idx], y[test_idx]
+    # SMOTE
+    smote = SMOTE(random_state=4262)
+    X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
 
-    # Scale training set first before using the same scaler for the test set
-    scaler, train_data = scale_mean_reads(train_data)
-    scaler, test_data = scale_mean_reads(test_data, scaler)
+    # Set up 5-fold cross-validation
+    kf = KFold(n_splits=5, shuffle=True, random_state=4262)
+    best_val_auc_pr = 0
 
-    # Prepare model input
-    X_train = prepare_for_model(train_data)
-    y_train = train_data['label'].values  # Prepare labels for training
+    for fold, (train_idx, val_idx) in enumerate(kf.split(X_resampled)):
+        print(f"Training fold {fold + 1}")
 
-    X_test = prepare_for_model(test_data)
-    y_test = test_data['label'].values  # Prepare labels for testing
+        # Split the data for this fold
+        X_train, X_val = X_resampled[train_idx].copy(), X_resampled[val_idx].copy()
+        y_train, y_val = y_resampled[train_idx].copy(), y_resampled[val_idx].copy()
 
-    gene_ids_train = gene_ids[train_idx]
+        # Initialize and compile the model
+        model = build_model(X_train.shape[1])
 
-    # Set up GroupKFold for cross-validation
-    gkf = GroupKFold(n_splits=5)
-    best_fold_auc = 0.0
-    
-    for fold, (train_fold_idx, val_fold_idx) in enumerate(gkf.split(X_train, y_train, groups=gene_ids_train)):
-        print(f'Training fold {fold + 1}...')
-
-        X_fold_train, X_fold_val = X_train[train_fold_idx].copy(), X_train[val_fold_idx].copy()
-        y_fold_train, y_fold_val = y_train[train_fold_idx].copy(), y_train[val_fold_idx].copy()
-
-        model = build_model(X_fold_train.shape[1])
-        checkpoint = ModelCheckpoint(
-            f"{ARTIFACTS_FOLDER}/best_model_fold_{fold + 1}.keras",
-            save_best_only=True,
-            monitor='val_auc_pr',
-            mode='max'
+        # Define a temporary callback to track best model in this fold
+        temp_checkpoint = ModelCheckpoint(
+            'temp_best_model_fold.keras', monitor='val_auc_pr', mode='max', save_best_only=True
         )
 
-        model.fit(
-            X_fold_train, y_fold_train,
-            epochs=10,
+        # Train the model on this fold
+        history = model.fit(
+            X_train, y_train,
+            epochs=5,
             batch_size=32,
-            validation_data=(X_fold_val, y_fold_val),
-            callbacks=[checkpoint]
+            validation_data=(X_val, y_val),
+            callbacks=[temp_checkpoint]
         )
 
-        # Load the best model for this fold and evaluate on the test set
-        model.load_weights(f"{ARTIFACTS_FOLDER}/best_model_fold_{fold + 1}.keras")
-        test_auc = model.evaluate(X_test, y_test, verbose=0)[1]  # AUC-PR score
+        # Track the best validation AUC-PR for this fold
+        fold_best_auc_pr = max(history.history['val_auc_pr'])
+        print(f"Fold {fold + 1} best AUC-PR: {fold_best_auc_pr}")
 
-        print(f'Fold {fold + 1} Test AUC-PR: {test_auc:.4f}')
+        # Update the best model if this fold's AUC-PR is the highest
+        if fold_best_auc_pr > best_val_auc_pr:
+            best_val_auc_pr = fold_best_auc_pr
+            best_fold_model = load_model('temp_best_model_fold.keras')
+            # Save the best model across all folds
+            best_fold_model.save('trained_model.keras')
+            print(f"New best model saved with AUC-PR: {best_val_auc_pr}")
 
-        # Save model if it has the highest AUC-PR so far
-        if test_auc > best_fold_auc:
-            best_fold_auc = test_auc
-            best_fold_model = f"{ARTIFACTS_FOLDER}/best_model_fold_{fold + 1}.keras"
-
-    print(f'Best model from cross-validation (without SMOTE): {best_fold_model} with Test AUC-PR: {best_fold_auc:.4f}')
-
-    # Save the best model
-    model.load_weights(best_fold_model)
-    model.save(OUTPUT_MODEL_PATH)
-    
+    print("Training complete. Best model across all folds saved as 'trained_model.keras'.")
     return model
 
 
