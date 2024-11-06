@@ -115,6 +115,10 @@ Before training the model and generating the predictions, ensure that you have i
     ```sh
     python prediction.py --input ../data/prediction_data.json --output ../data/predictions/predictions.csv --model ../artifacts/trained_model.keras
     ```
+3. View predictions:
+    ```sh
+    less ../data/predictions/predictions.csv
+    ```
 
 ## Authors
 
