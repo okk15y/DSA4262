@@ -41,7 +41,7 @@ def make_predictions(input_path, output_path, model_path):
 
     # Create a DataFrame with results
     results_df = dataset[['transcript_id', 'position']].copy()
-    results_df['prediction'] = predictions
+    results_df['score'] = predictions
 
     # Ensure the output directory exists
     output_dir = os.path.dirname(output_path)
